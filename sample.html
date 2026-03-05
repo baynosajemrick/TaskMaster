@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TaskMaster</title>
+
+    <style>
+        body {
+            background: #f3f4f6;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4f46e5;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .gap {
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-register {
+            flex: 1;
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-login {
+            flex: 1;
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-add {
+            background: #4f46e5;
+            color: white;
+            padding: 10px 15px;
+        }
+
+        .logout {
+            color: red;
+            font-size: 12px;
+            background: none;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .task-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 5px;
+            margin-bottom: 8px;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .delete {
+            color: red;
+            background: none;
+            font-size: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>TaskMaster</h1>
+
+        <!-- Auth Section -->
+        <div id="authSection">
+
+            <input id="username" type="text" placeholder="Username">
+            <input id="password" type="password" placeholder="Password">
+
+            <div class="flex gap">
+                <button class="btn-register" onclick="register()">Register</button>
+                <button class="btn-login" onclick="login()">Login</button>
+            </div>
+
+        </div>
+
+        <!-- App Section -->
+        <div id="appSection" class="hidden">
+
+            <div class="topbar">
+                <p>Welcome, <span id="currentUser"></span></p>
+                <button class="logout" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="task-input">
+                <input id="taskInput" type="text" placeholder="New task">
+                <button class="btn-add" onclick="addTask()">Add</button>
+            </div>
+
+            <ul id="taskList"></ul>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let currentUser = localStorage.getItem("currentUser") || null;
+        let tasks = [];
+
+        if (currentUser) {
+            showApp();
+            loadTasks();
+        }
+
+        function register() {
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!username || !password) {
+                alert("Fill all fields");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+
+            if (users.find(u => u.username === username)) {
+                alert("Username already exists");
+                return;
+            }
+
+            users.push({ username, password });
+
+            localStorage.setItem("users", JSON.stringify(users));
+
+            alert("Registered successfully");
+
+        }
+
+        function login() {
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            let users = JSON.parse(localStorage.getItem("users")) || [];
+
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (!user) {
+                alert("Invalid credentials");
+                return;
+            }
+
+            currentUser = username;
+
+            localStorage.setItem("currentUser", username);
+
+            showApp();
+
+            loadTasks();
+
+        }
+
+        function logout() {
+
+            localStorage.removeItem("currentUser");
+
+            location.reload();
+
+        }
+
+        function showApp() {
+
+            document.getElementById("authSection").classList.add("hidden");
+
+            document.getElementById("appSection").classList.remove("hidden");
+
+            document.getElementById("currentUser").textContent = currentUser;
+
+        }
+
+        function addTask() {
+
+            const input = document.getElementById("taskInput");
+
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            tasks.push({ text, completed: false });
+
+            saveTasks();
+
+            renderTasks();
+
+            input.value = "";
+
+        }
+
+        function saveTasks() {
+
+            localStorage.setItem("tasks_" + currentUser, JSON.stringify(tasks));
+
+        }
+
+        function loadTasks() {
+
+            tasks = JSON.parse(localStorage.getItem("tasks_" + currentUser)) || [];
+
+            renderTasks();
+
+        }
+
+        function renderTasks() {
+
+            const list = document.getElementById("taskList");
+
+            list.innerHTML = "";
+
+            tasks.forEach((task, index) => {
+
+                const li = document.createElement("li");
+
+                li.innerHTML = `
+<span onclick="toggleTask(${index})" class="${task.completed ? 'completed' : ''}">
+${task.text}
+</span>
+
+<button onclick="deleteTask(${index})" class="delete">
+Delete
+</button>
+`;
+
+                list.appendChild(li);
+
+            });
+
+        }
+
+        function toggleTask(index) {
+
+            tasks[index].completed = !tasks[index].completed;
+
+            saveTasks();
+
+            renderTasks();
+
+        }
+
+        function deleteTask(index) {
+
+            tasks.splice(index, 1);
+
+            saveTasks();
+
+            renderTasks();
+
+        }
+
+    </script>
+
+</body>
+
+</html>
