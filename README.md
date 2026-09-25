@@ -1,5 +1,5 @@
-Student Name: 
-Course & Year: 
+Student Name: BAYNOSA JEMRICK
+Course & Year: BSIT 2 SECTION 1
 Database Used: SQLite   
 
 Features & Implementation Summary
