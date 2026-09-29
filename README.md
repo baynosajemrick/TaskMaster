@@ -1,6 +1,9 @@
-Student Name: BAYNOSA JEMRICK
-Course & Year: BSIT 2 SECTION 1
-Database Used: SQLite   
+Student Name: 
+BAYNOSA JEMRICK
+Course & Year:
+BSIT 2 SECTION 1
+Database Used: 
+SQLite   
 
 Features & Implementation Summary
 Add Task: Users can input a task title using an intuitive HTML form, creating and storing new entries directly in the SQLite database.   
